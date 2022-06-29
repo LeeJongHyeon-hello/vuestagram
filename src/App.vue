@@ -1,30 +1,38 @@
 <template>
   <div class="header">
     <ul class="header-button-left">
-      <li>Cancel</li>
+      <li v-on:click="step=0">Cancel</li>
     </ul>
     <ul class="header-button-right">
-      <li>Next</li>
+      <li v-if="step==1" v-on:click="step++">Next</li>
+      <li v-if="step==2" v-on:click="publish">발행</li>
     </ul>
     <img src="./assets/logo.png" class="logo" />
   </div>
 
-  <Container :postData="postData"/>
-  <button v-on:click="more">더보기</button>
+  <!-- <p>{{$store.state.more}}</p>
+  <button v-on:click="$store.dispatch('getData')">더보기 버튼</button> -->
 
+  <ContainerVue @write="writePost = $event" :postData="postData" :imageURL="imageURL" :step="step" :selectFilter="selectFilter"/>
+  <!-- <button v-on:click="more">더보기</button> -->
 
   <div class="footer">
     <ul class="footer-button-plus">
-      <input type="file" id="file" class="inputfile" />
+      <input v-on:change="upload" accept="image/*" type="file" id="file" class="inputfile" />
       <label for="file" class="input-plus">+</label>
     </ul>
  </div>
+
+
+
 </template>
 
 <script>
-import Container from './components/Container.vue'
+import ContainerVue from './components/ContainerVue.vue'
 import postData from './assets/PostData.js'
 import axios from 'axios'
+import { mapMutations, mapState } from 'vuex'
+
 
 export default {
   name: 'App',
@@ -32,11 +40,22 @@ export default {
     return {
       postData : postData,
       moreNum : 0,
+      step : 3,
+      imageURL : '',
+      writePost : '',
+      selectFilter : '',
     }
   },
   components: {
-    Container,
+    ContainerVue,
   },
+  mounted(){
+      this.emitter.on('selectFilter', e =>{
+        this.selectFilter = e;
+        console.log(this.selectFilter);
+      });
+    },
+
   methods:{
     more(){ 
       axios.get(`https://codingapple1.github.io/vue/more${this.moreNum}.json`)
@@ -45,9 +64,37 @@ export default {
         this.moreNum++;
       })
       .catch(err => {
-        console.log(errrrrrrrrrrrrrrrrr)
+        console.log(err)
       })
-    }
+    },
+    upload(e){
+      let file = e.target.files;
+      this.imageURL = URL.createObjectURL(file[0]);
+      console.log(this.imageURL)
+      this.step = 1;
+    },
+    publish(){
+      var myPost = {name: "Kim Hyun",
+      userImage: "https://placeimg.com/100/100/arch",
+      postImage: this.imageURL,
+      likes: 36,
+      date: "May 15",
+      liked: false,
+      content: this.writePost,
+      filter: this.selectFilter,
+      };
+      console.log('zzzzzzzz '+ this.selectFilter);
+      this.postData.unshift(myPost);
+      this.step=0;
+    },
+    ...mapMutations(['setMore','feelSend'])
+  },
+  computed:{
+    getName(){
+      return this.$store.state.name;
+    },
+    ...mapState(['name','likes']),
+    ...mapState({ 내이름 :'name',}),
   },
 }
 </script>

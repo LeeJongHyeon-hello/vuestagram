@@ -4,9 +4,9 @@
       <div class="profile"></div>
       <span class="profile-name">{{postData.name}}</span>
     </div>
-    <div class="post-body" :style="{backgroundImage: `url(${postData.postImage})`}"></div>
+    <div v-on:click="$store.commit('feelSend')" :class="postData.filter" class="post-body" :style="{backgroundImage: `url(${postData.postImage})`}"></div>
     <div class="post-content">
-      <p>{{postData.likes}}</p>
+      <p>{{$store.state.likes}}</p>
       <p><strong>{{postData.name}}</strong>{{postData.content}}</p>
       <p class="date">{{postData.date}}</p>
     </div>
@@ -16,9 +16,10 @@
 <script>
 
 export default {
-  name : 'Post',
+  name : 'PostVue',
   props :{
     postData : Object,
+
   },
 }
 </script>
